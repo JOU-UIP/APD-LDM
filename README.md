@@ -1,6 +1,6 @@
 # APD-LDM
 
-<div align="center">
+
 
 <h2>Amplitude-Phase Decomposition-based Latent Diffusion Model for
 Underwater Image Enhancement</h2>
@@ -18,6 +18,7 @@ Underwater Image Enhancement</h2>
 - Pytorch >= 1.13.1
 - CUDA >= 11.3
 - Other required packages in `requirements.txt`
+
 
 ## 📦 Models
 

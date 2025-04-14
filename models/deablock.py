@@ -1,0 +1,44 @@
+from torch import nn
+from models.cga import SpatialAttention,ChannelAttention,PixelAttention
+class DEABlock(nn.Module):
+    def __init__(self, conv, dim, kernel_size, reduction=8):
+        super(DEABlock, self).__init__()
+        self.conv1 = conv(dim, dim, kernel_size, bias=True)
+        self.act1 = nn.ReLU(inplace=True)
+        self.conv2 = conv(dim, dim, kernel_size, bias=True)
+        self.sa = SpatialAttention()
+        self.ca = ChannelAttention(dim, reduction)
+        self.pa = PixelAttention(dim)
+
+    def forward(self, x):
+        res = self.conv1(x)
+        res = self.act1(res)
+        res = res + x
+        res = self.conv2(res)
+        cattn = self.ca(res)
+        sattn = self.sa(res)
+        pattn1 = sattn + cattn
+        pattn2 = self.pa(res, pattn1)
+        res = res * pattn2
+        res = res + x
+        return res
+
+
+class DEBlock(nn.Module):
+    def __init__(self, conv, dim, kernel_size):
+        super(DEBlock, self).__init__()
+        self.conv1 = conv(dim, dim, kernel_size, bias=True)
+        self.act1 = nn.ReLU(inplace=True)
+        self.conv2 = conv(dim, dim, kernel_size, bias=True)
+        self.conv3 = nn.Conv2d(dim, dim, kernel_size=(1, 1), stride=(1, 1), padding=0)
+        
+    def forward(self, x):
+        
+        res = self.conv1(x)
+        r = self.conv3(x)
+        res = self.act1(res)
+        res = res + x
+        res = self.conv2(res)
+        res = res + x
+        out = res + r
+        return out
